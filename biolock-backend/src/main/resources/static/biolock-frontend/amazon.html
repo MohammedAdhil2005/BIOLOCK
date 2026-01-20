@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BioLock | Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dashboard.css">
+<style>/* Basic reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Body */
+body {
+  display: flex;
+  min-height: 100vh;
+  background: #f0f2f5;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  background: linear-gradient(180deg, #1e3c72, #2a5298);
+  color: #fff;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-header h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.sidebar-nav button {
+  display: block;
+  width: 100%;
+  margin: 10px 0;
+  padding: 12px;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: 0.3s;
+}
+
+.sidebar-nav button:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+/* Main content */
+.main-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* Top nav */
+.top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.top-nav .title {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.btn.logout {
+  padding: 8px 16px;
+  background: #e74c3c;
+  border: none;
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn.logout:hover {
+  background: #c0392b;
+}
+
+/* Profile panel */
+.profile-panel {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  background: rgba(255,255,255,0.1);
+  padding: 10px 15px;
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+}
+
+.profile-card {
+  display: flex;
+  align-items: center;
+}
+
+.profile-card .avatar {
+  width: 50px;
+  height: 50px;
+  background: #2a5298;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 600;
+  font-size: 1.2rem;
+  margin-right: 12px;
+}
+
+.profile-card .profile-info .email {
+  font-size: 0.85rem;
+  color: #ddd;
+}
+
+/* Search */
+.search-bar {
+  margin-bottom: 15px;
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+/* Section title */
+.section-title {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+/* Data container */
+.data-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+/* Card */
+.card {
+  background: rgba(255,255,255,0.3);
+  backdrop-filter: blur(8px);
+  padding: 15px;
+  border-radius: 12px;
+  width: 250px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.card-left .card-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 5px;
+}
+
+.card-left .card-sub {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 5px;
+}
+
+.card-left .card-meta {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+/* Card actions */
+.card-actions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.card-actions .btn {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: none;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.card-actions .btn.small {
+  font-size: 0.75rem;
+}
+
+.card-actions .btn.outline {
+  background: transparent;
+  border: 1px solid #2a5298;
+  color: #2a5298;
+}
+
+.card-actions .btn.outline:hover {
+  background: #2a5298;
+  color: #fff;
+}
+
+.card-actions .btn.danger {
+  background: #e74c3c;
+  color: #fff;
+}
+
+.card-actions .btn.danger:hover {
+  background: #c0392b;
+}
+
+/* Details panel */
+.details-panel {
+  margin-top: 20px;
+  background: rgba(255,255,255,0.25);
+  backdrop-filter: blur(8px);
+  padding: 15px;
+  border-radius: 12px;
+}
+
+.details-panel pre {
+  background: rgba(255,255,255,0.1);
+  padding: 10px;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+/* Empty message */
+.empty {
+  color: #888;
+  font-style: italic;
+}
+</style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>BioLock</h2>
+    </div>
+    <nav class="sidebar-nav">
+      <button id="homeBtn">Home</button>
+      <button id="studentBtn">Students</button>
+      <button id="employeeBtn">Employees</button>
+      <button id="businessBtn">Business</button>
+    </nav>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main-content">
+    <!-- Top nav -->
+    <div class="top-nav">
+      <div class="title">Dashboard</div>
+      <button id="logoutBtn" class="btn logout">Logout</button>
+    </div>
+
+    <!-- Profile panel -->
+    <div id="profilePanel" class="profile-panel"></div>
+
+    <!-- Search -->
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search records...">
+    </div>
+
+    <!-- Section title -->
+    <h2 id="dataTitle" class="section-title">Home</h2>
+
+    <!-- Data container -->
+    <div id="dataContainer" class="data-container"></div>
+
+    <!-- Optional details panel -->
+    <div id="detailsPanel" class="details-panel"></div>
+  </main>
+
+  <script type="module" src="dashboard.js">
+    // dashboard.js
+// Usage: <script type="module" src="dashboard.js"></script>
+
+import { auth, db } from './firebase-config.js';
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  onSnapshot,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  deleteDoc,
+  orderBy,
+  limit
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+/*
+  Expected HTML elements (IDs/classes):
+  - #profilePanel  -> area to show small user profile info
+  - #dataTitle     -> heading showing current section name (Profile / Students / Employees / Business)
+  - #dataContainer -> where cards/list rows will be appended
+  - #searchInput   -> text input for search/filter
+  - Buttons/links with IDs: #homeBtn, #studentBtn, #employeeBtn, #businessBtn, #logoutBtn
+  - Modal or details area with id #detailsPanel (optional)
+*/
+
+const elements = {
+  profilePanel: document.getElementById('profilePanel'),
+  dataTitle: document.getElementById('dataTitle'),
+  dataContainer: document.getElementById('dataContainer'),
+  searchInput: document.getElementById('searchInput'),
+  homeBtn: document.getElementById('homeBtn'),
+  studentBtn: document.getElementById('studentBtn'),
+  employeeBtn: document.getElementById('employeeBtn'),
+  businessBtn: document.getElementById('businessBtn'),
+  logoutBtn: document.getElementById('logoutBtn'),
+  detailsPanel: document.getElementById('detailsPanel') // optional
+};
+
+let currentUser = null;
+let currentSection = 'home'; // 'students' | 'employees' | 'businesses' | 'home'
+let unsubscribeRealtime = null; // store onSnapshot unsubscribe
+
+// Map friendly section name -> firestore collection name
+const sectionCollections = {
+  students: 'students',
+  employees: 'employees',
+  businesses: 'businesses'
+};
+
+// initialize dashboard
+async function initDashboard() {
+  // wait for auth to be ready
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) {
+      // not logged in -> redirect to welcome/signin
+      window.location.href = 'Welcome.html';
+      return;
+    }
+    currentUser = user;
+    console.log('Dashboard for:', user.uid, user.email);
+    renderProfile(user);
+    attachUIListeners();
+    loadSection('students'); // default show students (or change to 'home')
+  });
+}
+
+// render small profile panel
+function renderProfile(user) {
+  if (!elements.profilePanel) return;
+  const displayName = user.displayName || 'User';
+  const email = user.email || '';
+  const html = `
+    <div class="profile-card">
+      <div class="avatar">${getInitials(displayName)}</div>
+      <div class="profile-info">
+        <strong>${escapeHtml(displayName)}</strong>
+        <div class="email">${escapeHtml(email)}</div>
+      </div>
+    </div>
+  `;
+  elements.profilePanel.innerHTML = html;
+}
+
+function getInitials(name = '') {
+  return name.split(' ').map(s => s[0] || '').slice(0,2).join('').toUpperCase();
+}
+
+// attach nav/search/logout listeners
+function attachUIListeners() {
+  if (elements.studentBtn) elements.studentBtn.addEventListener('click', () => loadSection('students'));
+  if (elements.employeeBtn) elements.employeeBtn.addEventListener('click', () => loadSection('employees'));
+  if (elements.businessBtn) elements.businessBtn.addEventListener('click', () => loadSection('businesses'));
+  if (elements.homeBtn) elements.homeBtn.addEventListener('click', () => loadSection('home'));
+  if (elements.logoutBtn) elements.logoutBtn.addEventListener('click', handleLogout);
+  if (elements.searchInput) elements.searchInput.addEventListener('input', () => applySearchFilter());
+}
+
+// load a section and setup realtime listener
+async function loadSection(sectionKey) {
+  // remove previous realtime listener if any
+  if (unsubscribeRealtime) {
+    try { unsubscribeRealtime(); } catch (e) { console.warn(e); }
+    unsubscribeRealtime = null;
+  }
+
+  currentSection = sectionKey;
+
+  if (!elements.dataTitle || !elements.dataContainer) return;
+
+  if (sectionKey === 'home') {
+    elements.dataTitle.textContent = 'Home / Overview';
+    elements.dataContainer.innerHTML = renderHomeOverview();
+    return;
+  }
+
+  const collName = sectionCollections[sectionKey];
+  if (!collName) {
+    elements.dataTitle.textContent = 'Unknown';
+    elements.dataContainer.innerHTML = '<p>Invalid section</p>';
+    return;
+  }
+
+  elements.dataTitle.textContent = sectionKey.charAt(0).toUpperCase() + sectionKey.slice(1);
+
+  // Build query: documents created by this user (assuming each doc has field 'uid')
+  const q = query(collection(db, collName), where('uid', '==', currentUser.uid), orderBy('createdAt', 'desc'));
+
+  // realtime listener
+  unsubscribeRealtime = onSnapshot(q, snapshot => {
+    const items = [];
+    snapshot.forEach(docSnap => {
+      items.push({ id: docSnap.id, ...docSnap.data() });
+    });
+    renderList(items);
+  }, err => {
+    console.error('Realtime error', err);
+    elements.dataContainer.innerHTML = `<p class="error">Failed to load ${sectionKey}: ${err.message}</p>`;
+  });
+}
+
+// render home overview (simple)
+function renderHomeOverview() {
+  return `
+    <div class="welcome">
+      <h2>Welcome, ${escapeHtml(currentUser.displayName || currentUser.email || 'User')}!</h2>
+      <p>Use the left menu to view Student, Employee or Business details. Click any item to view details or edit.</p>
+    </div>
+  `;
+}
+
+// render array of items as cards or rows
+function renderList(items = []) {
+  if (!elements.dataContainer) return;
+  if (!items.length) {
+    elements.dataContainer.innerHTML = `<p class="empty">No records found in ${currentSection}.</p>`;
+    return;
+  }
+
+  // Build HTML
+  const html = items.map(item => renderItemCard(item)).join('\n');
+  elements.dataContainer.innerHTML = html;
+
+  // attach button listeners for each generated card (view/edit/delete)
+  items.forEach(item => {
+    const viewBtn = document.getElementById(`view-${item.id}`);
+    const editBtn = document.getElementById(`edit-${item.id}`);
+    const delBtn = document.getElementById(`del-${item.id}`);
+
+    if (viewBtn) viewBtn.addEventListener('click', () => openDetails(item));
+    if (editBtn) editBtn.addEventListener('click', () => openEditForm(item));
+    if (delBtn) delBtn.addEventListener('click', () => confirmAndDelete(item));
+  });
+}
+
+function renderItemCard(item) {
+  // Show common fields if present; customize per section if needed
+  const title = escapeHtml(item.fullName || item.recordTitle || item.companyName || 'No Title');
+  const sub = escapeHtml(item.designation || item.contactNumber || item.email || '');
+  const createdAt = item.createdAt ? new Date(item.createdAt?.seconds ? item.createdAt.seconds * 1000 : item.createdAt).toLocaleString() : '';
+
+  return `
+    <div class="card" id="card-${item.id}">
+      <div class="card-left">
+        <div class="card-title">${title}</div>
+        <div class="card-sub">${sub}</div>
+        <div class="card-meta">Saved: ${escapeHtml(createdAt)}</div>
+      </div>
+      <div class="card-actions">
+        <button id="view-${item.id}" class="btn small">View</button>
+        <button id="edit-${item.id}" class="btn small outline">Edit</button>
+        <button id="del-${item.id}" class="btn small danger">Delete</button>
+      </div>
+    </div>
+  `;
+}
+
+// view details (show in panel or alert)
+function openDetails(item) {
+  if (!elements.detailsPanel) {
+    // fallback: show in alert
+    alert(JSON.stringify(item, null, 2));
+    return;
+  }
+
+  const html = `
+    <h3>${escapeHtml(item.fullName || item.recordTitle || item.companyName || 'Details')}</h3>
+    <pre class="details-json">${escapeHtml(JSON.stringify(item, null, 2))}</pre>
+    <div class="details-actions">
+      <button id="details-edit" class="btn">Edit</button>
+      <button id="details-close" class="btn outline">Close</button>
+    </div>
+  `;
+  elements.detailsPanel.innerHTML = html;
+
+  // wire up details panel buttons
+  const btnEdit = document.getElementById('details-edit');
+  const btnClose = document.getElementById('details-close');
+  if (btnEdit) btnEdit.addEventListener('click', () => openEditForm(item));
+  if (btnClose) btnClose.addEventListener('click', () => elements.detailsPanel.innerHTML = '');
+}
+
+// open edit form (simple prompt-based fallback)
+async function openEditForm(item) {
+  // For simplicity: prompt for fullName/recordTitle/companyName depending on item
+  const keyField = item.fullName ? 'fullName' : item.recordTitle ? 'recordTitle' : item.companyName ? 'companyName' : null;
+  if (!keyField) {
+    alert('This item cannot be edited with the simple editor. Implement a custom form.');
+    return;
+  }
+
+  const newVal = prompt('Edit name/title:', item[keyField] || '');
+  if (newVal === null) return; // cancelled
+
+  // update in firestore
+  const coll = sectionCollections[currentSection];
+  if (!coll) return alert('Invalid section for update.');
+
+  try {
+    const docRef = doc(db, coll, item.id);
+    await updateDoc(docRef, { [keyField]: newVal });
+    alert('Updated successfully.');
+  } catch (err) {
+    console.error(err);
+    alert('Update failed: ' + err.message);
+  }
+}
+
+async function confirmAndDelete(item) {
+  const ok = confirm('Delete this record? This action cannot be undone.');
+  if (!ok) return;
+
+  const coll = sectionCollections[currentSection];
+  if (!coll) return alert('Invalid section for delete.');
+
+  try {
+    const docRef = doc(db, coll, item.id);
+    await deleteDoc(docRef);
+    alert('Deleted.');
+  } catch (err) {
+    console.error(err);
+    alert('Delete failed: ' + err.message);
+  }
+}
+
+// search filter (simple client-side)
+function applySearchFilter() {
+  const q = elements.searchInput?.value?.trim().toLowerCase() || '';
+  if (!q) {
+    // reload current section (keep realtime active, but simplest is to re-run loadSection to re-render last snapshot)
+    // We'll just trigger a tiny no-op: the realtime onSnapshot already re-rendered everything.
+    // But to apply client filter we can filter DOM nodes:
+    filterDOMCards(q);
+    return;
+  }
+  filterDOMCards(q);
+}
+
+function filterDOMCards(q) {
+  const container = elements.dataContainer;
+  if (!container) return;
+  const cards = container.querySelectorAll('.card');
+  cards.forEach(card => {
+    const text = card.textContent.toLowerCase();
+    if (text.includes(q)) card.style.display = '';
+    else card.style.display = 'none';
+  });
+}
+
+// logout
+async function handleLogout() {
+  try {
+    await signOut(auth);
+    window.location.href = 'Welcome.html';
+  } catch (err) {
+    console.error('Logout failed', err);
+    alert('Logout failed: ' + err.message);
+  }
+}
+
+/* Utility: very small escaping to avoid HTML injection when inserting user content */
+function escapeHtml(unsafe) {
+  if (unsafe === undefined || unsafe === null) return '';
+  return String(unsafe)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+// Initialize
+initDashboard();
+
+// Export for debugging if needed
+window.__bioDashboard = {
+  loadSection,
+  currentSection
+};
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>BioLock | Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: #f7f9fc;
+    color: #111;
+    overflow-x: hidden;
+  }
+
+  /* Navbar */
+  .navbar {
+    background: linear-gradient(90deg, #136160, #0e5e6c);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+  .navbar h1 { margin: 0; font-size: 2.2rem; }
+  .navbar button {
+    padding: 10px 18px;
+    border: none; border-radius: 25px;
+    cursor: pointer; background: #00c896;
+    margin: 4px; transition: 0.4s ease;
+  }
+  .navbar button:hover {
+    background-color: #515609;
+    color: whitesmoke;
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(255,255,200,0.5);
+  }
+
+  /* Sidebar */
+  .sidebar {
+    height: 100%; width: 0;
+    position: fixed; top: 0; left: 0;
+    background: #1f2d2b; color: white;
+    overflow: hidden; transition: 0.3s;
+    padding-top: 60px; z-index: 2000;
+  }
+  .sidebar.open { width: 250px; padding: 20px; }
+  .sidebar .closebtn {
+    position: absolute; top: 15px; right: 20px;
+    font-size: 25px; cursor: pointer;
+  }
+  .sidebar .profile-section { text-align: center; margin-bottom: 30px; }
+  .sidebar .profile-img {
+    width: 70px; height: 70px; border-radius: 50%;
+    background: #00c896; display: flex;
+    align-items: center; justify-content: center;
+    font-size: 28px; font-weight: bold;
+    margin: auto; color: white;
+    box-shadow: 0 0 18px rgba(0,200,150,0.5);
+  }
+  .sidebar .profile-info { margin-top: 10px; }
+  .sidebar .profile-info span { display: block; }
+
+  /* Hamburger */
+  .hamburger { font-size: 28px; cursor: pointer; margin-right: 10px; }
+
+  /* Intro */
+  .intro { padding-left: 20px;}
+  .intro h2 { font-size: 2.5rem; margin-bottom: 15px;}
+  .intro p { font-size: 1.1rem; color: #555; line-height: 1.7; }
+
+  /* Features */
+  .feature-section { padding: 40px 30px; }
+  .feature-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 30px; justify-items: center;
+  }
+  .feature-title{
+    background-color: #136160;padding: 15px;border-radius: 30px;font-size: 15px;
+  }
+   .feature-title:hover{
+    background-color: #515609;
+    color: whitesmoke;
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(255,255,200,0.5);
+   }
+  .feature {
+    background: white; padding: 35px 25px;
+    border-radius: 20px; text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+  }
+  .feature:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 0 20px rgba(0,200,150,0.4);
+  }
+
+  /* Drawer */
+  .drawer {
+    position: fixed;
+    top: 0; right: -100%;
+    width: 400px; height: 100%;
+    background: #fff;
+    box-shadow: -4px 0 15px rgba(0,0,0,0.3);
+    padding: 30px;
+    transition: right 0.4s ease;
+    z-index: 3000;
+    overflow-y: auto;
+  }
+  .drawer.open { right: 0; }
+  .drawer h2 { margin-top: 0; color: #136160; }
+  .drawer .close-drawer {
+    position: absolute; top: 15px; right: 20px;
+    font-size: 24px; cursor: pointer;
+  }
+  .drawer form { margin-top: 20px; }
+  .drawer label { display: block; margin-bottom: 6px; font-weight: 600; }
+  .drawer input {
+    width: 100%; padding: 12px 15px;
+    margin-bottom: 15px;
+    border: 1.5px solid #ccc; border-radius: 12px;
+    font-size: 1rem; outline: none;
+  }
+  .drawer input:focus { border-color: #00c896; }
+  .drawer .btn { width: 48%; margin-right: 2%; }
+
+  /* Info Section */
+  .info-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 50px 40px;
+    gap: 20px;
+    color: white;
+  }
+  .info-text { flex: 1; }
+  .info-text h2 { font-size: 2rem; margin-bottom: 10px; }
+  .info-text p { line-height: 1.6; font-size: 1.05rem; }
+
+  .info-icon {
+    flex: 0.5;
+    display: flex;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .info-icon img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: white;
+    padding: 20px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.3);
+    transition: transform 0.3s ease;
+  }
+  .info-icon img:hover { transform: scale(1.1);box-shadow: #00c896; }
+
+  /* Different background colors */
+  .student-section {     
+    background-color: rgb(213, 212, 212);
+    border-top: 3px solid #00000033;color: rgb(72, 69, 69);
+    border-bottom: 3px solid #00000033; }
+  .employee-section {  
+    /* background-color: rgb(213, 212, 212); */
+    border-top: 3px solid #00000033;color: rgb(0, 0, 0);
+    border-bottom: 3px solid #00000033; }
+  .business-section {
+    background-color: rgb(213, 212, 212);
+    color: rgb(72, 69, 69);
+    border-top: 3px solid #00000033;
+    border-bottom: 3px solid #00000033;
+  }
+  .healthcare-section { 
+    /* background-color: rgb(213, 212, 212); */
+    border-top: 3px solid #00000033;color: black;
+    border-bottom: 3px solid #00000033;}
+  .education-section {
+    background-color: rgb(213, 212, 212);color: rgb(72, 69, 69);
+    border-top: 3px solid #00000033;
+    border-bottom: 3px solid #00000033;}
+  .custom-section {    
+    /* background-color: rgb(213, 212, 212); */
+    border-top: 3px solid #00000033;color: black;
+    border-bottom: 3px solid #00000033;}
+
+/* Modal */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 3000;
+  left: 0; top: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  justify-content: center; align-items: center;
+}
+
+.modal-content {
+  background: #fff;
+  width:800px;           /* increased width */
+  max-width: 95%;         /* responsive for small screens */
+  max-height: 65%;        /* increased height */
+  overflow-y: auto;       /* scroll if content too long */
+  border-radius: 15px;
+  padding: 30px 35px;     /* increased padding */
+  position: relative;
+  animation: fadeIn 0.4s ease;
+  box-shadow: 0 10px 35px rgba(0,0,0,0.3);
+}
+
+  @keyframes fadeIn { from {opacity:0; transform:scale(0.8);} to {opacity:1; transform:scale(1);} }
+  .close-modal {
+    position: absolute; top: 15px; right: 20px;
+    font-size: 22px; cursor: pointer; color: #333;
+  }
+  .modal-content h2 { margin-top: 0; color: #136160; }
+  .modal-content label { display: block; margin: 8px 0 4px; font-weight: 600; }
+  .modal-content input {
+    width: 100%; padding: 10px;
+    border: 1.5px solid #ccc; border-radius: 10px;
+    margin-bottom: 12px;
+  }
+  .modal-content .btn {
+    width: 48%; margin-right: 2%; padding: 10px;
+    border: none; border-radius: 25px;
+    cursor: pointer; font-size: 1rem;
+  }
+  .btn-save { background: #00c896; color: #fff; }
+  .btn-reset { background: #e74c3c; color: #fff; }
+
+  /* Active log */
+  .logs-section {
+  padding: 40px 30px;
+  background-color: rgb(213, 212, 212);
+  border-top: 3px solid #00000022;
+  border-bottom: 3px solid #00000022;
+}
+
+.logs-section h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: rgb(72, 69, 69);
+}
+
+.logs-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-height: 350px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.log-card {
+  background: rgb(253, 247, 247);
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: 0.3s ease-in-out;
+  border-left: 6px solid #00c896;
+}
+
+.log-card:hover {
+  transform: translateX(5px);
+  box-shadow: 0 0 15px rgba(0,200,150,0.3);
+}
+
+.log-card h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #0e5e6c;
+}
+
+.log-card p {
+  margin: 5px 0 0;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+/* Logs Container Scroll Styling */
+#logs-container {
+  max-height: 300px; /* adjust as needed */
+  overflow-y: auto;  /* enable vertical scrolling */
+  padding-right: 5px; /* avoid content hiding behind scrollbar */
+  
+  /* For Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.3) transparent;
+}
+
+/* For Webkit browsers: Chrome, Safari, Opera */
+#logs-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+#logs-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#logs-container::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.3);
+  border-radius: 6px;
+  border: 2px solid transparent; 
+}
+
+  /* ---------------- Dark Mode ---------------- */
+  .dark-mode {
+    background: #121212;
+    color: #f1f1f1;
+  }
+  .dark-mode .navbar {
+    background: linear-gradient(90deg, #0a3c3b, #05343c);
+  }
+  .dark-mode .intro p { color: #ddd; }
+  .dark-mode .info-text{color: white;}
+  .dark-mode .student-section{background-color: rgb(90, 86, 86);}
+  .dark-mode .business-section{background-color: rgb(90, 86, 86);}
+  .dark-mode .education-section{background-color: rgb(90, 86, 86);}
+  .dark-mode .health-section{color: white;}
+  .dark-mode .feature { background: #1e1e1e; color: #f1f1f1; }
+  .dark-mode .drawer { background: #1c1c1c; color: #eee; }
+  .dark-mode .modal-content { background: #1c1c1c; color: #f1f1f1; }
+  .dark-mode input { background: #333; color: #fff; border: 1px solid #555; }
+  .dark-mode .logs-section{background-color: rgb(90, 86, 86);color: #fff; border:1px solid #555 ;}
+  .dark-mode .logs-section h2{color: white;}
+  .dark-mode .log-card {background: #1c1c1c;color: white;}
+  .dark-mode .log-card p{color: white;}
+</style>
+</head>
+<body>
+    <!-- Sidebar -->
+  <div id="mySidebar" class="sidebar">
+    <span class="closebtn" onclick="closeSidebar()">×</span>
+    <div class="profile-section">
+      <div class="profile-img" id="sidebar-logo">U</div>
+      <div class="profile-info">
+        <span id="sidebar-name">User Name</span>
+        <span id="sidebar-email">user@example.com</span>
+      </div>
+    </div>
+    
+    <div class="feature-section">
+      <div class="feature-list">
+        <div class="feature-title" onclick="openModal('student')">Student</div>
+        <div class="feature-title" onclick="openModal('employee')">Employee</div>
+        <div class="feature-title" onclick="openModal('business')">Business</div>
+        <div class="feature-title" onclick="openModal('healthcare')">Healthcare</div>
+        <div class="feature-title" onclick="openModal('education')">Education</div>
+        <div class="feature-title" onclick="openModal('custom')">Custom</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navbar -->
+  <div class="navbar">
+    <span class="hamburger" onclick="openSidebar()">☰</span>
+    <h1>🔐 BioLock</h1>
+    <div>
+      <button onclick="toggleTheme()">🌙 Dark Mode</button>
+      <button onclick="redirectToWelcome()">Logout</button>
+    </div>
+  </div>
+
+    <!-- Intro -->
+  <section class="intro">
+    <h2>What will you store today?</h2>
+    <p>BioLock is more than just a login system.
+It is a complete biometric-powered digital vault that allows you to secure, manage, and organize critical records across multiple domains — Students, Employees, Businesses, Healthcare, Education, and even your own custom data types.Built on retina-based authentication, BioLock ensures that only you can access, add, or manage your records.
+With its clean interface and modular design, it provides a future-ready solution for individuals, institutions, and organizations that value security + organization.</p>
+  </section>
+
+  <!-- Drawer -->
+  <div id="drawer" class="drawer">
+    <span class="close-drawer" onclick="closeDrawer()">×</span>
+    <h2 id="drawer-title">Form</h2>
+    <form id="drawer-form"></form>
+  </div>
+
+  <!-- Student Section -->
+  <div class="info-section student-section">
+    <div class="info-text">
+      <h2>🎓 Student Details</h2>
+      <p>BioLock offers a dedicated student records module where you can:
+Store essential details like Student ID, Name, Course, Year of Study, Contact Information, and Address.
+Track academic progress and personal data in a structured, searchable way.
+Quickly add or update student entries through a user-friendly interface.
+Perfect for schools, colleges, and universities to maintain secure digital profiles for students.</p>
+    </div>
+    <div class="info-icon" onclick="openModal('student')">
+      <img src="https://img.icons8.com/color/96/student-male.png" alt="Student">
+    </div>
+  </div>
+
+  <!-- Employee Section -->
+  <div class="info-section employee-section">
+    <div class="info-text">
+      <h2>💼 Employee Details</h2>
+      <p>Keep all your workforce information organized, secure, and accessible:
+Save Employee ID, Company Name, Designation, Experience, and Contact Details.
+Track work history, roles, and HR-specific data.
+Ensure privacy of sensitive employee information with biometric protection. A powerful tool for HR departments, enterprises, and startups alike.</p>
+    </div>
+    <div class="info-icon" onclick="openModal('employee')">
+      <img src="https://img.icons8.com/color/96/worker-male.png" alt="Employee">
+    </div>
+  </div>
+
+  <!-- Business Section -->
+  <div class="info-section business-section">
+    <div class="info-text">
+      <h2>🏢 Business Records</h2>
+      <p>A smart way to manage business-related data in one place:
+Record Business ID, Name, Industry Type, Established Year, and Official Address.
+Categorize and retrieve records easily with structured fields.
+Keep sensitive business information safe from unauthorized access.
+Tailored for entrepreneurs, SMBs, and large enterprises managing multiple ventures.</p>
+    </div>
+    <div class="info-icon" onclick="openModal('business')">
+      <img src="https://img.icons8.com/color/96/company.png" alt="Business">
+    </div>
+  </div>
+
+  <!-- Healthcare Section -->
+  <div class="info-section healthcare-section">
+    <div class="info-text">
+      <h2>🏥 Healthcare Records</h2>
+      <p>Your personal health data vault, fully secured:
+
+Store hospital records, medical reports, prescriptions, diagnosis details, and treatment history.
+Access old records in seconds when visiting doctors or hospitals.
+Keep everything digitized, safe, and private — away from prying eyes.
+ A must-have for individuals, families, and medical institutions to manage healthcare securely.</p>
+    </div>
+    <div class="info-icon" onclick="openModal('healthcare')">
+      <img src="https://img.icons8.com/color/96/hospital-room.png" alt="Healthcare">
+    </div>
+  </div>
+
+  <!-- Education Section -->
+  <div class="info-section education-section">
+    <div class="info-text">
+      <h2>📚 Education Records</h2>
+      <p>Track every educational achievement with ease:
+Save Marksheets, Certifications, Year of Completion, Course Details, and Institution Names.
+Organize academic milestones in chronological order.
+Retrieve important certificates or proof of education whenever required.
+ A personal academic archive for students, professionals, and lifelong learners.</p>
+    </div>
+    <div class="info-icon" onclick="openModal('education')">
+      <img src="https://img.icons8.com/color/96/open-book.png" alt="Education">
+    </div>
+  </div>
+
+  <!-- Custom Section -->
+  <div class="info-section custom-section">
+    <div class="info-text">
+      <h2>🛠️ Custom Data</h2>
+      <p>BioLock gives you the freedom to design your own record type:
+Add custom fields, labels, and values as per your needs.
+Store personal, professional, or unique information securely.
+  Ideal for those who need flexibility beyond fixed modules.
+ Your data, your way — without limitations.</p>
+    </div>
+    <div class="info-icon" onclick="openModal('custom')">
+      <img src="https://img.icons8.com/color/96/settings.png" alt="Custom">
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" onclick="closeModal()">×</span>
+      <h2 id="modal-title">Form</h2>
+      <form id="modal-form"></form>
+    </div>
+  </div>
+
+    <!-- Active Logs Section -->
+  <section class="logs-section">
+    <h2>📜 Active Logs</h2>
+    <div id="logs-container" class="logs-container">
+      <!-- Records will appear here -->
+    </div>
+  </section>
+
+
+<!-- Firebase v10 Modular -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+// 🔹 Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyBJjNhYqY77F5DQd-WManPuup-rE4QQ9kQ",
+  authDomain: "biolockweb.firebaseapp.com",
+  projectId: "biolockweb",
+  storageBucket: "biolockweb.appspot.com",
+  messagingSenderId: "XXXXXXX",
+  appId: "1:XXXXXXX:web:XXXXXXX"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+// =========================
+// 🌙 Theme, Sidebar, Logout
+// =========================
+function toggleTheme() { document.body.classList.toggle("dark-mode"); }
+function redirectToWelcome() { 
+  alert("Logging out..."); 
+  window.location.href = "Welcome.html"; 
+}
+function openSidebar() { document.getElementById("mySidebar").classList.add("open"); }
+function closeSidebar() { document.getElementById("mySidebar").classList.remove("open"); }
+
+// =========================
+// ➕ Add Custom Fields
+// =========================
+function addCustomField() {
+  const container = document.getElementById("custom-fields");
+  if (!container) return;
+  const index = container.children.length / 2 + 1; // label-value pair count
+  const fieldHTML = `
+    <label>Field Label ${index}</label>
+    <input type="text" placeholder="Enter Field Label" required/>
+    <label>Field Value ${index}</label>
+    <input type="text" placeholder="Enter Field Value" required/>
+  `;
+  container.insertAdjacentHTML("beforeend", fieldHTML);
+}
+
+// =========================
+// 🔹 Modal Logic
+// =========================
+function openModal(type) {
+  const modal = document.getElementById("modal");
+  const title = document.getElementById("modal-title");
+  const form = document.getElementById("modal-form");
+  let fields = [];
+
+  switch(type) {
+    case "student":
+      title.textContent = "🎓 Student Form";
+      fields = [
+        { label: "Student ID", type: "text" },
+        { label: "Full Name", type: "text" },
+        { label: "Aadhaar Number", type: "text", maxlength:12, pattern:"\\d{12}", placeholder:"Enter 12 digits" },
+        { label: "College Name", type: "text" },
+        { label: "Course", type: "text" },
+        { label: "Year", type: "number" },
+        { label: "Date of Birth", type: "date", max: new Date().toISOString().split("T")[0] },
+        { label: "Grade/GPA", type: "text" },
+        { label: "Contact Number", type: "text", maxlength:10, pattern:"\\d{10}", placeholder:"Enter 10 digits" },
+        { label: "Address", type: "text" }
+      ];
+      break;
+
+    case "employee":
+      title.textContent = "💼 Employee Form";
+      fields = [
+        { label: "Employee ID", type:"text" },
+        { label: "Full Name", type:"text" },
+        { label: "Company Name", type:"text" },
+        { label: "Designation", type:"text" },
+        { label: "Experience (Years)", type:"number" },
+        { label: "Contact Number", type:"text", maxlength:10, pattern:"\\d{10}", placeholder:"Enter 10 digits" },
+        { label: "Address", type:"text" }
+      ];
+      break;
+
+    case "business":
+      title.textContent = "🏢 Business Form";
+      fields = [
+        { label: "Business ID", type:"text" },
+        { label: "Business Name", type:"text" },
+        { label: "Industry Type", type:"text" },
+        { label: "Established Date", type:"date", max: new Date().toISOString().split("T")[0] },
+        { label: "Business Address", type:"text" }
+      ];
+      break;
+
+    case "healthcare":
+      title.textContent = "🏥 Health Record Form";
+      fields = [
+        { label: "Health Record ID", type:"text" },
+        { label: "Patient Name", type:"text" },
+        { label: "Hospital Name", type:"text" },
+        { label: "Diagnosis", type:"text" },
+        { label: "Record Date", type:"date", max: new Date().toISOString().split("T")[0] },
+        { label: "Contact Number", type:"text", maxlength:10, pattern:"\\d{10}", placeholder:"Enter 10 digits" }
+      ];
+      break;
+
+    case "education":
+      title.textContent = "📚 Education Record Form";
+      fields = [
+        { label: "Education Record ID", type:"text" },
+        { label: "Institution", type:"text" },
+        { label: "Course/Subject", type:"text" },
+        { label: "Marks/Grade", type:"text" },
+        { label: "Year Completed", type:"number" }
+      ];
+      break;
+
+    case "custom":
+      title.textContent = "🛠️ Custom Data Form";
+      form.innerHTML = `
+        <label>Record Title</label>
+        <input type="text" placeholder="Enter Record Title" required id="recordTitle"/>
+        <div id="custom-fields"></div>
+        <button type="button" onclick="addCustomField()" 
+          style="background:#3498db;color:#fff;padding:10px 15px;border:none;border-radius:10px;margin:10px 0;cursor:pointer;">
+          ➕ Add Field
+        </button>
+        <br>
+        <button type="reset" class="btn btn-reset">Reset</button>
+        <button type="submit" class="btn btn-save">Save</button>
+      `;
+      modal.style.display = "flex";
+      return;
+  }
+
+  form.innerHTML = fields.map(f => `
+    <label>${f.label}</label>
+    <input 
+      type="${f.type}" 
+      ${f.maxlength ? `maxlength="${f.maxlength}"` : ""}
+      ${f.pattern ? `pattern="${f.pattern}" title="Please enter valid format"` : ""}
+      ${f.max ? `max="${f.max}"` : ""}
+      ${f.placeholder ? `placeholder="${f.placeholder}"` : ""}
+      required
+    >
+  `).join("") + `
+    <button type="reset" class="btn btn-reset">Reset</button>
+    <button type="submit" class="btn btn-save">Save</button>
+  `;
+  modal.style.display = "flex";
+}
+
+function closeModal() { document.getElementById("modal").style.display = "none"; }
+
+// =========================
+// 🔹 Validation Functions
+// =========================
+function isAadharValid(aadhar) { return /^\d{12}$/.test(aadhar); }
+function isContactValid(contact) { return /^\d{10}$/.test(contact); }
+function isDOBValid(dob) { return new Date(dob) <= new Date(); }
+
+// =========================
+// 🔹 Form Submit Handler (Save with UID)
+document.getElementById("modal-form").addEventListener("submit", async function(e){
+  e.preventDefault();
+  const modalTitle = document.getElementById("modal-title").textContent;
+  const inputs = this.querySelectorAll("input");
+  let payload = {};
+  let apiUrl = "";
+
+  try {
+    if(modalTitle.includes("Student")) {
+      payload = {
+        studentId: inputs[0].value.trim(),
+        fullName: inputs[1].value.trim(),
+        aadharNumber: inputs[2].value.trim(),
+        collegeName: inputs[3].value.trim(),
+        course: inputs[4].value.trim(),
+        year: parseInt(inputs[5].value.trim()),
+        dob: inputs[6].value.trim(),
+        grade: inputs[7].value.trim(),
+        contactNumber: inputs[8].value.trim(),
+        address: inputs[9].value.trim()
+      };
+      if(!isAadharValid(payload.aadharNumber)) return alert("❌ Aadhaar must be exactly 12 digits!");
+      if(!isContactValid(payload.contactNumber)) return alert("❌ Contact must be exactly 10 digits!");
+      if(!isDOBValid(payload.dob)) return alert("❌ DOB cannot be in the future.");
+     
+      apiUrl = "http://localhost:8081/students";
+
+    } else if(modalTitle.includes("Employee")) {
+      payload = {
+        employeeId: inputs[0].value.trim(),
+        fullName: inputs[1].value.trim(),
+        companyName: inputs[2].value.trim(),
+        designation: inputs[3].value.trim(),
+        experience: parseInt(inputs[4].value.trim()),
+        contactNumber: inputs[5].value.trim(),
+        address: inputs[6].value.trim()
+      };
+      if(!isContactValid(payload.contactNumber)) return alert("❌ Contact must be exactly 10 digits!");
+      apiUrl = "http://localhost:8081/employees";
+
+    } else if(modalTitle.includes("Business")) {
+      payload = {
+        businessId: inputs[0].value.trim(),
+        businessName: inputs[1].value.trim(),
+        industryType: inputs[2].value.trim(),
+        established: inputs[3].value.trim(),
+        address: inputs[4].value.trim()
+      };
+      apiUrl = "http://localhost:8081/businesses";
+
+    } else if(modalTitle.includes("Health")) {
+      payload = {
+        recordId: inputs[0].value.trim(),
+        patientName: inputs[1].value.trim(),
+        hospital: inputs[2].value.trim(),
+        diagnosis: inputs[3].value.trim(),
+        date: inputs[4]?.value?.trim() || new Date(),
+        contactNumber: inputs[5]?.value?.trim() || ""
+      };
+      if(payload.contactNumber && !isContactValid(payload.contactNumber)) return alert("❌ Contact must be exactly 10 digits!");
+      apiUrl = "http://localhost:8081/healthcare";
+
+    } else if(modalTitle.includes("Education")) {
+      payload = {
+        recordId: inputs[0].value.trim(),
+        institution: inputs[1].value.trim(),
+        course: inputs[2].value.trim(),
+        marks: inputs[3].value.trim(),
+        yearOfPassing: parseInt(inputs[4].value.trim()),
+        grade: inputs[5]?.value?.trim() || ""
+      };
+      apiUrl = "http://localhost:8081/education";
+
+    } else if(modalTitle.includes("Custom")) {
+      const recordTitle = document.getElementById("recordTitle").value.trim();
+      const container = document.getElementById("custom-fields");
+      let customData = [];
+      if(container){
+        const cInputs = container.querySelectorAll("input");
+        for(let i=0;i<cInputs.length;i+=2){
+          const label=cInputs[i].value.trim();
+          const value=cInputs[i+1].value.trim();
+          if(label && value) customData.push({ fieldName: label, fieldValue: value});
+        }
+      }
+      payload = { recordTitle, fields: customData };
+      apiUrl = "http://localhost:8081/api/custom";
+    }
+
+   // 🔑 Step 3: Save with UID
+const currentUser = auth.currentUser;
+if (!currentUser) { 
+  alert("Please login first"); 
+  return; 
+}
+payload.uid = currentUser.uid;
+
+
+  const res = await fetch(apiUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  const result = await res.json();
+
+if(result.id){
+  alert("✅ Record saved successfully!");
+
+  // 🆕 Add to Active Logs
+  const logsContainer = document.getElementById("logs-container");
+  const logCard = document.createElement("div");
+  logCard.classList.add("log-card");
+  const logTitle = modalTitle.replace("Form","").trim();
+  const logData = Object.entries(payload)
+    .map(([key,val]) => `<p><strong>${key}:</strong> ${val}</p>`).join("");
+  logCard.innerHTML = `<h3>${logTitle} Record</h3>${logData}<p><em>Saved at: ${new Date().toLocaleString()}</em></p>`;
+  logsContainer.prepend(logCard);
+
+} else { 
+  alert("❌ Error saving record. Check backend!"); 
+}
+
+
+} catch(err) { 
+  console.error("Error saving record:", err); 
+  alert("❌ Could not connect to backend!"); 
+}
+
+closeModal();
+this.reset();
+  
+});
+
+// =========================
+// 🔹 Fetch + Display with UID
+// =========================
+
+async function fetchAndDisplay(apiPath, displayFunc){
+  // ✅ Try Firebase auth user first, else fallback to localStorage
+  const user = auth.currentUser || JSON.parse(localStorage.getItem("biolockUser"));
+  if(!user) return;
+
+  const uid = user.uid;
+  const res = await fetch(`http://localhost:8081/${apiPath}?uid=${uid}`);
+  const data = await res.json();
+  displayFunc(data);
+}
+
+
+// Display Functions (same as before)
+function displayEmployees(data){const c=document.getElementById("logs-container");data.forEach(i=>{const card=document.createElement("div");card.classList.add("log-card");card.innerHTML=`<h3>Employee Record</h3>${Object.entries(i).map(([k,v])=>`<p><strong>${k}:</strong> ${v}</p>`).join("")}<p><em>Loaded at: ${new Date().toLocaleString()}</em></p>`;c.prepend(card);});}
+function displayStudents(data){const c=document.getElementById("logs-container");data.forEach(i=>{const card=document.createElement("div");card.classList.add("log-card");card.innerHTML=`<h3>Student Record</h3>${Object.entries(i).map(([k,v])=>`<p><strong>${k}:</strong> ${v}</p>`).join("")}<p><em>Loaded at: ${new Date().toLocaleString()}</em></p>`;c.prepend(card);});}
+function displayBusinesses(data){const c=document.getElementById("logs-container");data.forEach(i=>{const card=document.createElement("div");card.classList.add("log-card");card.innerHTML=`<h3>Business Record</h3>${Object.entries(i).map(([k,v])=>`<p><strong>${k}:</strong> ${v}</p>`).join("")}<p><em>Loaded at: ${new Date().toLocaleString()}</em></p>`;c.prepend(card);});}
+function displayHealthcare(data){const c=document.getElementById("logs-container");data.forEach(i=>{const card=document.createElement("div");card.classList.add("log-card");card.innerHTML=`<h3>Healthcare Record</h3>${Object.entries(i).map(([k,v])=>`<p><strong>${k}:</strong> ${v}</p>`).join("")}<p><em>Loaded at: ${new Date().toLocaleString()}</em></p>`;c.prepend(card);});}
+function displayEducation(data){const c=document.getElementById("logs-container");data.forEach(i=>{const card=document.createElement("div");card.classList.add("log-card");card.innerHTML=`<h3>Education Record</h3>${Object.entries(i).map(([k,v])=>`<p><strong>${k}:</strong> ${v}</p>`).join("")}<p><em>Loaded at: ${new Date().toLocaleString()}</em></p>`;c.prepend(card);});}
+function displayCustom(data) {
+  const c = document.getElementById("logs-container");
+  c.innerHTML = ""; // clear existing logs if needed
+
+  data.forEach(i => {
+    const card = document.createElement("div");
+    card.classList.add("log-card");
+
+    // Format createdAt
+    const createdAt = i.createdAt?.$date 
+      ? new Date(i.createdAt.$date).toLocaleString() 
+      : i.createdAt 
+        ? new Date(i.createdAt).toLocaleString() 
+        : "Unknown";
+
+    // Render fields correctly
+    let fieldsHTML = "<p>No fields found</p>";
+    if (i.fields && i.fields.length > 0) {
+      fieldsHTML = "<ul>";
+      i.fields.forEach(f => {
+        // Ensure f is an object and has keys
+        if (f && f.fieldName && f.fieldValue) {
+          fieldsHTML += `<li><strong>${f.fieldName}:</strong> ${f.fieldValue}</li>`;
+        }
+      });
+      fieldsHTML += "</ul>";
+    }
+
+    card.innerHTML = `
+      <h3>🛠️ Custom Data Record</h3>
+      <p><strong>Record Title:</strong> ${i.recordTitle}</p>
+      ${fieldsHTML}
+      <p><strong>UID:</strong> ${i.uid}</p>
+      <p><strong>Saved at:</strong> ${createdAt}</p>
+    `;
+
+    c.prepend(card);
+  });
+}
+
+// =========================
+// 🔹 Update Sidebar Function
+// =========================
+function updateSidebar(user){
+  if(!user) return;
+  const nameEl = document.getElementById("sidebar-name");
+  const emailEl = document.getElementById("sidebar-email");
+  const logoEl = document.getElementById("sidebar-logo");
+
+  const username = user.username || user.displayName || user.email?.split('@')[0] || "User";
+
+  if(nameEl) nameEl.textContent = username;
+  if(emailEl) emailEl.textContent = user.email || "user@example.com";
+  if(logoEl) logoEl.textContent = username[0].toUpperCase();
+}
+
+
+// =========================
+// 🔹 On Load with Auth Check
+// =========================
+window.addEventListener("load", () => {
+  onAuthStateChanged(auth, user => {
+    let currentUser = user || JSON.parse(localStorage.getItem("biolockUser"));
+    if(!currentUser){
+      window.location.href = "Welcome.html";
+      return;
+    }
+
+    // Save fresh login to localStorage
+    if(user){
+      localStorage.setItem("biolockUser", JSON.stringify({
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName || "User"
+      }));
+    }
+
+    // ✅ Update sidebar
+    updateSidebar(currentUser);
+
+    // Load all dashboard data
+    fetchAndDisplay("students", displayStudents);
+    fetchAndDisplay("employees", displayEmployees);
+    fetchAndDisplay("businesses", displayBusinesses);
+    fetchAndDisplay("healthcare", displayHealthcare);
+    fetchAndDisplay("education", displayEducation);
+    fetchAndDisplay("api/custom", displayCustom);
+  });
+});
+
+
+
+// Optional: Drawer open/close
+function openDrawer(title, fieldsHtml){document.getElementById("drawer").classList.add("open");document.getElementById("drawer-title").textContent=title;document.getElementById("drawer-form").innerHTML=fieldsHtml;}
+function closeDrawer(){document.getElementById("drawer").classList.remove("open");}
+
+// 🔹 Global exposure for HTML onclick
+window.toggleTheme=toggleTheme;
+window.redirectToWelcome=redirectToWelcome;
+window.openSidebar=openSidebar;
+window.closeSidebar=closeSidebar;
+window.addCustomField=addCustomField;
+window.openModal=openModal;
+window.closeModal=closeModal;
+window.openDrawer=openDrawer;
+window.closeDrawer=closeDrawer;
+</script>
+
+
+
+</body>
+</html>

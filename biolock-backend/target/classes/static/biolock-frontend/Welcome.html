@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BioLock - Retina Login System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/yourFontAwesomeKit.js" crossorigin="anonymous"></script>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  body {
+    /* background: linear-gradient(135deg, #0a0f0d, #111111); */
+    background-color: white;
+    color: #000000;
+    overflow-x: hidden;animation: fadeIn 0.5s ease-in-out;
+  }
+
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: linear-gradient(90deg, #136160, #0e5e6c);
+    padding: 25px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0, 200, 150, 0.2);
+  }
+
+  .project-name {
+    font-size: 2.1rem;
+    font-weight: 600;
+    color: #cdcdcd;
+  }
+  .project-name p{
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #cdcdcd;
+    margin-left: 20px;
+  }  
+
+  .nav-buttons button {
+    margin-left: 15px;
+    padding: 10px 20px;
+    border-radius: 25px;
+    background-color: #00c896;
+    border: none;
+    color: rgb(0, 0, 0);
+    cursor: pointer;
+    transition: 0.5s ease;
+  }
+
+  .nav-buttons button:hover {
+    background-color: #515609;
+    color: whitesmoke;
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(0, 200, 150, 0.3);
+  }
+
+  section {
+    padding: 80px 60px;
+  }
+
+  .intro h1 {
+    font-size: 3rem;
+    color: #000000;
+    margin-bottom: 20px;
+  }
+
+  .intro p {
+    font-size: 1.3rem;
+    max-width: 100%;
+    line-height: 1.8;
+  }
+
+  .features {
+    /* background: rgba(221, 1, 1, 0.04); */
+    background-color: rgb(213, 212, 212);
+    border-top: 3px solid #00000033;
+    border-bottom: 3px solid #00000033;
+  }
+
+  .feature-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    margin-top: 30px;
+  }
+
+  .feature {
+    background: rgba(41, 169, 167, 0.5);
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(10, 243, 185, 0.2);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s;
+  }
+
+  .feature:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+  }
+
+  .feature i {
+    font-size: 2rem;
+    color: #00c896;
+    margin-bottom: 10px;
+  }
+
+  .feature h3 {
+    font-size: 1.rem;
+    margin-bottom: 10px;
+    color: #ffffff;
+  }
+  .how-it-works{
+    /* background: rgb(7, 0, 0); */
+    background-color: white;
+    border-top: 3px solid #00000033;
+    border-bottom: 3px solid #00000033;
+  }
+
+  .how-it-works img {
+    max-width: 100%;
+    border-radius: 15px;
+    margin-top: 20px;
+    box-shadow: 0 0 20px rgba(0, 200, 150, 0.3);
+    margin-top: 20px;
+
+  }
+  .how-it-works p{
+    font-size: 1.2rem;
+  }
+  .how-it-works h2{
+    font-size: 1.5rem;
+    margin-bottom: 7px;
+  }
+
+  .domain-section {
+     /* background: rgba(255, 255, 255, 0.04); */
+     background-color: rgb(213, 212, 212);
+    padding: 60px;
+    color: #000000;
+  }
+
+  .domain-section h2 {
+    font-size: 2rem;
+    color: #000000;
+    margin-bottom: 20px;
+  }
+
+  .domain-tags span {
+    display: inline-block;
+    margin: 10px;
+    padding: 10px 18px;
+    background: rgb(0, 0, 0);
+    border: 1px solid #807e7e;
+    border-radius: 25px;
+    font-weight: bold;
+    color: #ffffff;
+  }
+  .domain-tags span:hover{
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s;
+    transform: scale(1.08);
+    box-shadow: 0 6 25px rgba(0, 0, 0, 0);
+  }
+  .get-started {
+    text-align: center;
+    padding: 40px;
+  }
+
+  .get-started button {
+    padding: 15px 40px;
+    font-size: 1.2rem;
+    border-radius: 30px;
+    background-color: #00c896;
+    border: none;
+    cursor: pointer;
+    color: rgb(0, 0, 0);
+    transition: 0.3s ease;
+  }
+
+  .get-started button:hover {
+    background-color: #3e4204;
+    transform: scale(1.05);color: whitesmoke;
+  }
+
+  @keyframes fadeIn {
+    0% {opacity: 0; transform: translateY(20px);}
+    100% {opacity: 1; transform: translateY(0);}
+  }
+
+  @media (max-width: 768px) {
+    .intro h1 {
+      font-size: 2.2rem;
+    }
+
+    .intro p {
+      font-size: 1rem;
+    }
+  }
+
+
+/*toggle*/
+   body.dark-mode {
+    background-color: #121212;
+    color: #f1f1f1;
+  }
+
+
+  body.dark-mode .features,
+  body.dark-mode .domain-section,
+  body .dark-mode h1{
+    background-color: #1e1e1e;
+    color: #ccc;
+    border-color: #444;
+  }
+  body.dark-mode .intro h1 {
+  color: #ffffff;
+}
+
+ /* 🌙 DARK MODE support for domain section */
+   body.dark-mode .domain-section,
+   body.dark-mode .domain-section h2,
+   body.dark-mode .domain-section p,
+   body.dark-mode .domain-section li,
+   body.dark-mode .domain-section ul {
+  color: #ffffff;
+}
+
+body.dark-mode .domain-section,
+body.dark-mode .how-it-works,
+body.dark-mode .features{
+  box-shadow: 0 0 20px rgba(0, 200, 150, 0.3);
+}
+
+
+  body.dark-mode .feature {
+    background: rgba(41, 169, 167, 0.15);
+    box-shadow: 0 4px 20px rgba(5, 223, 209, 0.1);
+  }
+
+  body.dark-mode .domain-tags span {
+    background-color: #2a2a2a;
+    color: #eee;
+    border: none;
+  }
+    body.dark-mode .feature:hover,
+    body.dark-mode .domain-tags span:hover{
+      box-shadow: 0 0 15px rgba(9, 232, 176, 0.3);
+    }
+
+  body.dark-mode .nav-buttons button,
+  body.dark-mode .get-started button {
+    background-color: #00c896;
+    color: #000;
+  }
+    body.dark-mode .how-it-works{
+      background-color: black;
+    }
+
+  body.dark-mode header {
+    background: linear-gradient(90deg, #0b3a3a, #06353f);
+  }
+
+  body.dark-mode .project-name p,
+  body.dark-mode .project-name {
+    color: #d0d0d0;
+  }
+
+  body.dark-mode .feature h3 {
+    color: #f1f1f1;
+  }
+
+  body.dark-mode .get-started button:hover,
+  body.dark-mode .nav-buttons button:hover {
+    background-color: #374709;
+    color: #fff;
+    box-shadow: 0 0 20px rgba(0, 200, 150, 0.3);
+  }
+
+</style>
+
+</head>
+<body>
+
+  <header>
+    <div class="project-name">🔐 BioLock<p>Retina based login system</p></div>
+    
+    <div class="nav-buttons">
+      <button onclick="location.href='index.html'">Sign In</button>
+      <button onclick="location.href='signup.html'">Sign Up</button>
+      <button id="modeToggle" class="toggle-btn">🌙 Dark Mode</button>  <!-- 🌙 Toggle Button -->
+    </div>
+  </header>
+
+  <section class="intro">
+    <h1>Welcome to BioLock</h1>
+    <p>BioLock uses cutting-edge Iris scan technology with AI and OpenCV to provide ultra-secure, passwordless sign-in. It supports storing and managing data for students, employees, businesses, and custom users. Perfect for use in education, healthcare, and enterprise sectors with full record management. Built with Firebase and Java backend, ensuring fast, reliable, and scalable authentication. Experience next-gen security and identity management – all in one platform.</p>
+  </section>
+
+  <section class="features">
+    <h2>🔍 Core Features</h2>
+    <div class="feature-list">
+      <div class="feature">
+        <i class="fas fa-eye"></i>
+        <h3>Retina Authentication</h3>
+        <p>Biometric Iris match for password-free, highly secure login.</p>
+      </div>
+      <div class="feature">
+        <i class="fas fa-user-shield"></i>
+        <h3>Custom User Roles</h3>
+        <p>Student, Employee, Business and Healthcare data – all managed securely and separately.</p>
+      </div>
+      <div class="feature">
+        <i class="fas fa-server"></i>
+        <h3>Java + Firebase Backend</h3>
+        <p>Spring Boot, Firebase Auth and MongoDB power a seamless backend system.</p>
+      </div>
+      <div class="feature">
+        <i class="fas fa-laptop-code"></i>
+        <h3>Responsive Dashboard</h3>
+        <p>Personal dashboards for each role with role-specific content and data access.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="how-it-works">
+    <h2>⚙️ How It Works</h2>
+    <p>When a user tries to sign in, their Iris is scanned and the image is processed using <strong>OpenCV</strong>. The backend compares retina data, verifies identity via <strong>Firebase Auth</strong>, and grants access to a secure, personalized dashboard based on the role.</p>
+    <img src="https://cdn.dribbble.com/users/103487/screenshots/15876493/media/5e75dc28f8c35b87a1d529b91e43b1f3.gif" alt="Retina Scan Process">
+  </section>
+
+  <section class="domain-section">
+    <h2>📚 Domain Applications</h2>
+    <br>
+    <div class="domain-tags">
+      <span>Student Academic Records</span>
+      <span>Employee Info & Payroll</span>
+      <span>Business Reports</span>
+      <span>Healthcare Data Access</span>
+      <span>Educational Records</span>
+      <span>Custom User Management</span>
+      <span>Multi-Dashboard Role Access</span>
+    </div>
+  </section>
+
+  <div class="get-started">
+    <h2>🚀Get Started Now</h2>
+    <br>
+    <button onclick="location.href='signup.html'">Start with Iris Login</button>
+  </div>
+
+<script>
+  const toggleBtn = document.getElementById('modeToggle');
+  const body = document.body;
+
+  // Load saved theme from localStorage
+  if (localStorage.getItem("theme") === "dark") {
+    body.classList.add("dark-mode");
+    toggleBtn.textContent = "☀️ Light Mode";
+  }
+
+  toggleBtn.addEventListener('click', () => {
+    body.classList.toggle("dark-mode");
+    
+    if (body.classList.contains("dark-mode")) {
+      localStorage.setItem("theme", "dark");
+      toggleBtn.textContent = "☀️ Light Mode";
+    } else {
+      localStorage.setItem("theme", "light");
+      toggleBtn.textContent = "🌙 Dark Mode";
+    }
+  });
+</script>
+
+</body>
+</html>

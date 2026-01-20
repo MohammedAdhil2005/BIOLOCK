@@ -1,0 +1,546 @@
+package com.biolock.service;
+
+import org.opencv.core.*;
+import org.opencv.features2d.BFMatcher;
+import org.opencv.features2d.ORB;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
+import java.util.Base64;
+import java.util.Arrays;
+
+public class RetinaMatcher {
+
+    public static boolean match(String username, String base64Image) {
+        try {
+            // Decode Base64
+            byte[] decodedBytes = Base64.getDecoder().decode(base64Image);
+            Mat inputImage = Imgcodecs.imdecode(new MatOfByte(decodedBytes), Imgcodecs.IMREAD_GRAYSCALE);
+            if (inputImage.empty()) {
+                System.out.println("❌ Input image is empty.");
+                return false;
+            }
+
+            // Load stored image
+            String storedPath = "images/" + username + ".png";
+            Mat storedImage = Imgcodecs.imread(storedPath, Imgcodecs.IMREAD_GRAYSCALE);
+            if (storedImage.empty()) {
+                System.out.println("❌ Stored image not found: " + storedPath);
+                return false;
+            }
+
+            // Resize both for consistency
+            Size targetSize = new Size(300, 300);
+            Imgproc.resize(inputImage, inputImage, targetSize);
+            Imgproc.resize(storedImage, storedImage, targetSize);
+
+            // Enhance both using CLAHE
+            inputImage = applyCLAHE(inputImage);
+            storedImage = applyCLAHE(storedImage);
+
+            // Reduce noise
+            Imgproc.GaussianBlur(inputImage, inputImage, new Size(3, 3), 0);
+            Imgproc.GaussianBlur(storedImage, storedImage, new Size(3, 3), 0);
+
+            // ORB Feature Detection
+            ORB orb = ORB.create();
+            MatOfKeyPoint kp1 = new MatOfKeyPoint(), kp2 = new MatOfKeyPoint();
+            Mat desc1 = new Mat(), desc2 = new Mat();
+            orb.detectAndCompute(inputImage, new Mat(), kp1, desc1);
+            orb.detectAndCompute(storedImage, new Mat(), kp2, desc2);
+
+            if (desc1.empty() || desc2.empty()) {
+                System.out.println("❌ Failed to extract descriptors.");
+                return false;
+            }
+
+            // Match with BFMatcher (Hamming)
+            BFMatcher matcher = BFMatcher.create(Core.NORM_HAMMING, true);
+            MatOfDMatch matches = new MatOfDMatch();
+            matcher.match(desc1, desc2, matches);
+
+            DMatch[] allMatches = matches.toArray();
+            Arrays.sort(allMatches, (m1, m2) -> Float.compare(m1.distance, m2.distance));
+
+            long goodMatches = Arrays.stream(allMatches)
+                    .limit(30) // Take best 30 matches
+                    .filter(m -> m.distance < 30) // Strict threshold
+                    .count();
+
+            System.out.println("🔍 Matching user: " + username);
+            System.out.println("🎯 Good Matches (<30 from top 30): " + goodMatches);
+
+            return goodMatches >= 15;
+
+        } catch (Exception e) {
+            System.out.println("🔥 Matching failed: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private static Mat applyCLAHE(Mat img) {
+        if (img.channels() == 3) {
+            Imgproc.cvtColor(img, img, Imgproc.COLOR_BGR2GRAY);
+        }
+        Imgproc.equalizeHist(img, img); // Basic hist equalization
+        CLAHE clahe = Imgproc.createCLAHE();
+        clahe.setClipLimit(2.0);
+        Mat result = new Mat();
+        clahe.apply(img, result);
+        return result;
+    }
+}
+
+
+
+
+
+package com.biolock.controller;
+
+import org.opencv.core.*;
+import org.opencv.features2d.BFMatcher;
+import org.opencv.features2d.ORB;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.CLAHE;
+import org.opencv.imgproc.Imgproc;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.*;
+import java.nio.file.*;
+import java.util.*;
+
+@RestController
+public class RetinaController {
+
+    static {
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+    }
+
+    // ✅ SIGN-UP: SAVE RETINA IMAGE
+    @PostMapping("/save-retina")
+    public ResponseEntity<String> saveRetina(@RequestBody Map<String, String> request) {
+        try {
+            String imageData = request.get("image");
+            String username = request.get("username");
+            String email = request.get("email");
+
+            if (imageData == null || username == null || email == null) {
+                return ResponseEntity.badRequest().body("Missing image or username or email.");
+            }
+
+            username = username.toLowerCase().replaceAll("[^a-z0-9]", "_");
+
+            if (imageData.startsWith("data:image")) {
+                imageData = imageData.split(",")[1];
+            }
+
+            byte[] imageBytes = Base64.getDecoder().decode(imageData);
+            Path outputPath = Paths.get("images", username + ".png");
+            Files.createDirectories(outputPath.getParent());
+            Files.write(outputPath, imageBytes);
+
+            return ResponseEntity.ok("Retina image saved successfully.");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to save retina image.");
+        }
+    }
+
+    // ✅ SIGN-IN: MATCH RETINA IMAGE
+    @PostMapping("/match-retina")
+    public ResponseEntity<Map<String, Object>> matchRetina(@RequestBody Map<String, String> payload) {
+        Map<String, Object> response = new HashMap<>();
+        String tempPath = "images/temp_scan.png";
+
+        try {
+            String username = payload.get("username");
+            String imageData = payload.get("image");
+
+            if (username == null || imageData == null) {
+                response.put("success", false);
+                response.put("error", "Missing username or image data");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            username = username.toLowerCase().replaceAll("[^a-z0-9]", "_");
+
+            if (imageData.startsWith("data:image")) {
+                imageData = imageData.split(",")[1];
+            }
+
+            byte[] decoded = Base64.getDecoder().decode(imageData);
+            Files.write(Paths.get(tempPath), decoded);
+
+            String storedPath = "images/" + username + ".png";
+            if (!Files.exists(Paths.get(storedPath))) {
+                response.put("success", false);
+                response.put("match", false);
+                response.put("error", "No stored retina image for user: " + username);
+                return ResponseEntity.ok(response);
+            }
+
+            // Load images and enhance
+            Mat img1 = Imgcodecs.imread(storedPath, Imgcodecs.IMREAD_GRAYSCALE);
+            Mat img2 = Imgcodecs.imread(tempPath, Imgcodecs.IMREAD_GRAYSCALE);
+
+            if (img1.empty() || img2.empty()) {
+                response.put("success", false);
+                response.put("error", "Error loading images.");
+                return ResponseEntity.status(500).body(response);
+            }
+
+            Imgproc.resize(img1, img1, new Size(300, 300));
+            Imgproc.resize(img2, img2, new Size(300, 300));
+
+            img1 = applyCLAHE(img1);
+            img2 = applyCLAHE(img2);
+
+            Imgproc.GaussianBlur(img1, img1, new Size(3, 3), 0);
+            Imgproc.GaussianBlur(img2, img2, new Size(3, 3), 0);
+
+            // ORB Feature Matching
+            ORB orb = ORB.create();
+            MatOfKeyPoint kp1 = new MatOfKeyPoint();
+            MatOfKeyPoint kp2 = new MatOfKeyPoint();
+            Mat desc1 = new Mat();
+            Mat desc2 = new Mat();
+
+            orb.detectAndCompute(img1, new Mat(), kp1, desc1);
+            orb.detectAndCompute(img2, new Mat(), kp2, desc2);
+
+            if (desc1.empty() || desc2.empty()) {
+                response.put("success", false);
+                response.put("match", false);
+                response.put("error", "Failed to extract retina features.");
+                return ResponseEntity.ok(response);
+            }
+
+            BFMatcher matcher = BFMatcher.create(Core.NORM_HAMMING, true);
+            MatOfDMatch matches = new MatOfDMatch();
+            matcher.match(desc1, desc2, matches);
+
+            List<DMatch> matchList = matches.toList();
+            double totalDist = 0;
+            int goodMatches = 0;
+
+            for (DMatch match : matchList) {
+                if (match.distance < 30) {
+                    goodMatches++;
+                    totalDist += match.distance;
+                }
+            }
+
+            double avgDistance = goodMatches > 0 ? totalDist / goodMatches : 0;
+            boolean isMatch = goodMatches >= 15;
+
+            System.out.println("✅ Good Matches: " + goodMatches + " | Avg Distance: " + avgDistance);
+
+            response.put("success", true);
+            response.put("match", isMatch);
+            response.put("goodMatches", goodMatches);
+            response.put("averageDistance", avgDistance);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("success", false);
+            response.put("error", "Internal server error: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        } finally {
+            try {
+                Files.deleteIfExists(Paths.get(tempPath));
+            } catch (IOException ignore) {}
+        }
+    }
+
+    // ✅ CLAHE ENHANCEMENT FUNCTION
+    private Mat applyCLAHE(Mat img) {
+        if (img.channels() == 3) {
+            Imgproc.cvtColor(img, img, Imgproc.COLOR_BGR2GRAY);
+        }
+        CLAHE clahe = Imgproc.createCLAHE();
+        clahe.setClipLimit(2.0);
+        Mat result = new Mat();
+        clahe.apply(img, result);
+        return result;
+    }
+}
+
+
+
+
+
+ok bro in this stage you may create the crt code for both matcher and controller code aa crt aa generate pannu vera ethaiyu alter pannatha ok va 
+
+retinamatcher.java
+package com.biolock.service;
+
+import org.opencv.core.*;
+import org.opencv.features2d.BFMatcher;
+import org.opencv.features2d.ORB;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
+import java.util.Base64;
+import java.util.Arrays;
+
+public class RetinaMatcher {
+
+    public static boolean match(String username, String base64Image) {
+        try {
+            // Decode the Base64 image received from frontend
+            byte[] decodedBytes = Base64.getDecoder().decode(base64Image);
+            Mat inputImage = Imgcodecs.imdecode(new MatOfByte(decodedBytes), Imgcodecs.IMREAD_GRAYSCALE);
+
+            if (inputImage.empty()) {
+                System.out.println("❌ Input image is empty or unreadable.");
+                return false;
+            }
+
+            // Load stored retina image from disk
+            String storedPath = "images/" + username + ".png";
+            Mat storedImage = Imgcodecs.imread(storedPath, Imgcodecs.IMREAD_GRAYSCALE);
+
+            if (storedImage.empty()) {
+                System.out.println("❌ Stored retina image not found: " + storedPath);
+                return false;
+            }
+
+            // Apply histogram equalization to normalize lighting
+            Imgproc.equalizeHist(inputImage, inputImage);
+            Imgproc.equalizeHist(storedImage, storedImage);
+
+            // ORB Feature Detection
+            ORB orb = ORB.create();
+            MatOfKeyPoint keypoints1 = new MatOfKeyPoint();
+            Mat descriptors1 = new Mat();
+            orb.detectAndCompute(inputImage, new Mat(), keypoints1, descriptors1);
+
+            MatOfKeyPoint keypoints2 = new MatOfKeyPoint();
+            Mat descriptors2 = new Mat();
+            orb.detectAndCompute(storedImage, new Mat(), keypoints2, descriptors2);
+
+            // Validate descriptors
+            if (descriptors1.empty() || descriptors2.empty()) {
+                System.out.println("❌ No keypoints detected in one or both images.");
+                return false;
+            }
+
+            // Match descriptors using BFMatcher
+            BFMatcher matcher = BFMatcher.create(Core.NORM_HAMMING, true);
+            MatOfDMatch matches = new MatOfDMatch();
+            matcher.match(descriptors1, descriptors2, matches);
+
+            // Convert to array and sort by distance
+            DMatch[] allMatches = matches.toArray();
+            Arrays.sort(allMatches, (m1, m2) -> Float.compare(m1.distance, m2.distance));
+
+            // Take top 30 matches and count how many are under distance threshold
+            long goodMatches = Arrays.stream(allMatches)
+                    .limit(30)
+                    .filter(m -> m.distance < 60)
+                    .count();
+
+            // Debug logs
+            System.out.println("🔍 Matching user: " + username);
+            System.out.println("✅ Total Matches: " + matches.size().height);
+            System.out.println("🎯 Good Matches (<60 distance from top 30): " + goodMatches + " (Threshold: 10)");
+
+            return goodMatches >= 10;
+
+        } catch (Exception e) {
+            System.out.println("🔥 Exception during retina matching: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+}
+
+retinacontroller.java
+package com.biolock.controller;
+
+import org.opencv.core.*;
+import org.opencv.features2d.BFMatcher;
+import org.opencv.features2d.ORB;
+import org.opencv.features2d.DescriptorMatcher;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfKeyPoint;
+import org.opencv.imgproc.CLAHE;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.imgcodecs.Imgcodecs;
+
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
+
+
+import java.io.*;
+import java.nio.file.*;
+import java.util.*;
+
+
+@RestController
+public class RetinaController {
+
+    static {
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+    } 
+
+    // ✅ SAVE RETINA IMAGE DURING SIGNUP
+    @PostMapping("/save-retina")
+    public ResponseEntity<String> saveRetina(@RequestBody Map<String, String> request) {
+        try {
+            String imageData = request.get("image");
+            String username = request.get("username");
+            String email = request.get("email");
+
+            if (imageData == null || username == null || email == null) {
+                return ResponseEntity.badRequest().body("Missing image or username or email.");
+            }
+
+            // Clean username for filename safety
+            username = username.toLowerCase().replaceAll("[^a-z0-9]", "_");
+
+            // Extract base64 part
+            if (imageData.startsWith("data:image")) {
+                imageData = imageData.split(",")[1];
+            }
+
+            byte[] imageBytes = Base64.getDecoder().decode(imageData);
+            Path outputPath = Paths.get("images", username + ".png");
+            Files.createDirectories(outputPath.getParent());
+            Files.write(outputPath, imageBytes);
+
+            return ResponseEntity.ok("Retina image saved successfully.");
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to save retina image.");
+        }
+    }
+
+    // ✅ MATCH RETINA IMAGE DURING SIGN-IN
+@PostMapping("/match-retina")
+public ResponseEntity<Map<String, Object>> matchRetina(@RequestBody Map<String, String> payload) {
+    Map<String, Object> response = new HashMap<>();
+
+    try {
+        String username = payload.get("username");
+        String imageData = payload.get("image");
+
+        if (username == null || imageData == null) {
+            response.put("success", false);
+            response.put("error", "Missing username or image data");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        username = username.toLowerCase().replaceAll("[^a-z0-9]", "_");
+
+        if (imageData.startsWith("data:image")) {
+            imageData = imageData.split(",")[1];
+        }
+
+        byte[] decoded = Base64.getDecoder().decode(imageData);
+        String tempPath = "images/temp_scan.png";
+        Files.write(Paths.get(tempPath), decoded);
+
+        String storedPath = "images/" + username + ".png";
+        if (!Files.exists(Paths.get(storedPath))) {
+            response.put("success", false);
+            response.put("match", false);
+            response.put("error", "No stored retina image for user: " + username);
+            return ResponseEntity.ok(response);
+        }
+         // Load and enhance images
+         Mat img1 = applyCLAHE(Imgcodecs.imread(storedPath, Imgcodecs.IMREAD_GRAYSCALE));
+         Mat img2 = applyCLAHE(Imgcodecs.imread(tempPath, Imgcodecs.IMREAD_GRAYSCALE));
+
+
+        // Optional: smooth out noise before feature detection
+        Imgproc.GaussianBlur(img1, img1, new Size(3, 3), 0);
+        Imgproc.GaussianBlur(img2, img2, new Size(3, 3), 0);
+
+
+        if (img1.empty() || img2.empty()) {
+            response.put("success", false);
+            response.put("error", "Error loading images.");
+            return ResponseEntity.status(500).body(response);
+        }
+
+     // Resize for consistency
+        Imgproc.resize(img1, img1, new Size(300, 300));
+        Imgproc.resize(img2, img2, new Size(300, 300));
+
+        // === ORB FEATURE MATCHING ===
+        ORB orb = ORB.create();
+        MatOfKeyPoint keypoints1 = new MatOfKeyPoint();
+        MatOfKeyPoint keypoints2 = new MatOfKeyPoint();
+        Mat descriptors1 = new Mat();
+        Mat descriptors2 = new Mat();
+
+        orb.detectAndCompute(img1, new Mat(), keypoints1, descriptors1);
+        orb.detectAndCompute(img2, new Mat(), keypoints2, descriptors2);
+
+      if (descriptors1.empty() || descriptors2.empty()) {
+      response.put("success", false);
+      response.put("match", false);
+      response.put("error", "Failed to extract retina features.");
+      return ResponseEntity.ok(response);
+        }
+        // Use BFMatcher with Hamming distance
+        BFMatcher matcher = BFMatcher.create(Core.NORM_HAMMING, true);
+        MatOfDMatch matches = new MatOfDMatch();
+        matcher.match(descriptors1, descriptors2, matches);
+
+        List<DMatch> matchList = matches.toList();
+        double totalDist = 0;
+        int goodMatches = 0;
+
+        for (DMatch match : matchList) {
+            if (match.distance < 30) { // Threshold: more strict
+                goodMatches++;
+                totalDist += match.distance;
+            }
+        }
+
+        double avgDistance = goodMatches > 0 ? totalDist / goodMatches : 0;
+        boolean isMatch = goodMatches > 15 ; // Adjust this threshold if needed
+
+        System.out.println("✅ Good matches: " + goodMatches + ", Avg Distance: " + avgDistance);
+        
+        response.put("success", true);
+        response.put("match", isMatch);
+        response.put("goodMatches", goodMatches);
+        response.put("averageDistance", avgDistance);
+
+        Files.deleteIfExists(Paths.get(tempPath));
+        return ResponseEntity.ok(response);
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        response.put("success", false);
+        response.put("error", "Internal server error: " + e.getMessage());
+        return ResponseEntity.status(500).body(response);
+    }
+}
+    // ✅ CLAHE IMAGE ENHANCEMENT METHOD
+     private Mat applyCLAHE(Mat img) {
+        if (img.channels() == 3) {
+            Imgproc.cvtColor(img, img, Imgproc.COLOR_BGR2GRAY);
+        }
+        CLAHE clahe = Imgproc.createCLAHE();
+        clahe.setClipLimit(2.0);
+        Mat result = new Mat();
+        clahe.apply(img, result);
+        return result;
+  
+}
+}
+
+
+
+
+ippo show pannu 

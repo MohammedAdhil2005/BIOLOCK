@@ -1,0 +1,149 @@
+cd "C:\Users\amoha\OneDrive\Desktop\BiolockProject\biolock-backend"
+
+mvn clean install
+
+mvn spring-boot:run
+
+MAIN:
+1. NODE.JS(Server.js): 
+
+cd C:\Users\amoha\OneDrive\Desktop\BiolockProject
+node Server.js
+
+2. Spring Boot(Tomcat):
+
+cd C:\Users\amoha\OneDrive\Desktop\BiolockProject\biolock-backend
+mvn spring-boot:run
+
+DEBUG:
+mvn spring-boot:run -X
+
+mvn spring-boot:run -e
+
+netstat -ano | findstr :8081
+
+ taskkill /PID 932 /F
+
+3. MONGO DB:
+
+cd "C:\Program Files\MongoDB\Server\7.0\bin"
+mkdir C:\data\db
+mongod.exe
+
+
+THEN GO:
+
+http://localhost:8081/biolock-frontend/Welcome.html
+
+http://localhost:8080/biolock-frontend/dashboard.html
+
+_______________________________________________________
+
+
+http://localhost:8080/biolock-frontend/index.html
+
+http://localhost:8081/biolock-frontend/index.html
+
+http://localhost:8081/biolock-frontend/signup.html
+
+netstat -ano | findstr :8081
+
+taskkill /PID 12600 /F
+
+echo $Env:PATHEXT
+
+
+ echo $Env:PATH
+
+http://localhost:8081/biolock-frontend/Welcome.html
+
+http://localhost:8081/biolock-frontend/index.html
+
+
+cd C:\Users\amoha\OneDrive\Desktop\BiolockProject
+
+node server.js
+
+http://localhost:5000/students
+
+{
+  "studentId": "STU1001",
+  "fullName": "Arun Kumar",
+  "aadharNumber": "123456789012",
+  "collegeName": "PSG Tech",
+  "course": "BSc Computer Science",
+  "year": 2,
+  "dob": "2003-06-15",
+  "grade": "A",
+  "contactNumber": "9876543210",
+  "address": "Coimbatore, Tamil Nadu"
+}
+
+http://localhost:5000/employees
+
+{
+  "employeeId": "EMP2001",
+  "fullName": "Meena R",
+  "companyName": "TCS",
+  "designation": "Software Engineer",
+  "experience": 3,
+  "contactNumber": "9876501234",
+  "address": "Chennai, Tamil Nadu"
+}
+
+http://localhost:5000/businesses
+
+{
+  "businessId": "BUS3001",
+  "businessName": "Fresh Foods",
+  "industryType": "Retail",
+  "established": "2018-05-10",
+  "address": "Madurai, Tamil Nadu"
+}
+
+http://localhost:5000/custom
+
+{
+  "sectionName": "Sports Achievements",
+  "data": {
+    "playerName": "Ravi",
+    "sport": "Cricket",
+    "level": "State",
+    "award": "Best Bowler 2023"
+  }
+}
+
+http://localhost:5000/healthcare
+
+{
+  "recordId": "H1001",
+  "patientName": "Suresh Kumar",
+  "aadharNumber": "987654321012",
+  "hospital": "Apollo Hospital",
+  "diagnosis": "Diabetes",
+  "doctor": "Dr. Priya",
+  "date": "2025-02-20",
+  "contactNumber": "9876001122"
+}
+
+http://localhost:5000/education
+
+{
+  "recordId": "EDU5001",
+  "institution": "Anna University",
+  "course": "MSc Data Science",
+  "marks": "85%",
+  "yearOfPassing": 2024,
+  "grade": "A"
+}
+
+
+npm install mongodb
+
+node testConnection.js
+
+
+
+npm start
+
+npm init -y

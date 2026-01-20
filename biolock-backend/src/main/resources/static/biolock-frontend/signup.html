@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>BioLock | Sign Up</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="signup">
+  <div class="container">
+    <div class="welcome-box">
+      <h1>Welcome to BioLock</h1>
+      <p>Register securely using our advanced Iris identification system.</p>
+    </div>
+    <div class="box">
+      <h2>🆕 Create Account</h2>
+      <p class="intro-msg">create a secure account with biometric verification.</p>
+     
+    <!-- 🌙 Toggle Button at Top Right -->
+   <div class="mode-toggle-container">
+   <button id="modeToggle" class="toggle-btn">🌙 Dark Mode</button>
+   </div>
+
+      <form id="signupForm">
+        <input type="text" id="signupUsername" placeholder="Username" required />
+        <input type="email" id="signupEmail" placeholder="Email" required />
+        <input type="password" id="signupPassword" placeholder="Password" required />
+        <input type="password" id="confirmPassword" placeholder="Confirm Password" required />
+
+      <div class="retina-box">
+      <label for="retinaPreviewSignUp">📸 Iris Scan:</label>
+      
+      <div class="retina-scan-area">
+      <video id="retinaCam" autoplay ></video>
+      <img id="retinaPreviewSignUp" style="display: none;" />
+      </div>
+      </div>
+
+      
+        <button type="button" id="scanRetinaSignBtn">📷 Scan Iris</button>
+        <canvas id="retinaCanvasSign" style="display: none;"></canvas>
+
+        <div class="popup-overlay" id="popupBox">
+         <div class="popup-message">
+          <p id="popupText">Passwords do not match.</p>
+          <button onclick="closePopup()">OK</button>
+         </div>
+       </div>
+       
+        <button type="button" id="createAccountBtn">✅ Create Account</button>
+      </form>
+
+      
+
+      <p>Already have an account?
+        <a href="index.html">Sign In</a>
+      </p>
+      
+    </div>
+  </div>
+    <!-- ✅ Bubble Background Layer -->
+  <div class="bubbles">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+
+  <!-- Firebase & Scripts
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script> -->
+
+<!-- Your Firebase config -->
+<script type="module" src="firebase-config.js"></script>
+
+<!-- Your custom logic -->
+<!-- Only use this for v10+ -->
+<script type="module" src="./script.js"></script>
+
+</body>
+</html>
